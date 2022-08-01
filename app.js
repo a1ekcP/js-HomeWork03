@@ -15,20 +15,9 @@ document.querySelector('.search').onkeyup = function(event){
 document.querySelector('.input-date').onchange = function(event){
     let valueDate = event.currentTarget.value.replace(/-/g, '');
 
-    fetch(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${valueDate}&json`).then(function (data){
-    return data.json();
-}).then(function(data) {
-    currency = data.map(function(el) {
-        return {
-            name: el.txt,
-            rate: el.rate,
-            code: el.cc,
-            data: el.exchangedate
-            };
-        });
-        currencyRender(currency);
-        document.querySelector('.search').value = '';
-});
+    getCurrency(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${valueDate}&json`);
+    
+    document.querySelector('.search').value = '';
 }
 
 function currencyRender(currency){
@@ -46,16 +35,19 @@ function currencyRender(currency){
 
 currencyRender(currency);
 
-fetch(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=20220801&json`).then(function (data){
-    return data.json();
-}).then(function(data) {
-    currency = data.map(function(el) {
-        return {
-            name: el.txt,
-            rate: el.rate,
-            code: el.cc,
-            data: el.exchangedate
-            };
-        });
-        currencyRender(currency);
-});
+function getCurrency(date){
+    fetch(date).then(function (data){
+        return data.json();
+    }).then(function(data) {
+        currency = data.map(function(el) {
+            return {
+                name: el.txt,
+                rate: el.rate,
+                code: el.cc,
+                data: el.exchangedate
+                };
+            });
+            currencyRender(currency);
+    });
+}
+getCurrency('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=20220801&json');
