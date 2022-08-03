@@ -2,6 +2,32 @@
 let currency = [];
 
 
+function toSort() {
+    for(i of document.querySelectorAll('[data-attr]')){//[txt rate cc]
+        i.onclick = function(event){
+            let key = event.currentTarget.getAttribute("data-attr");
+            let isSorted = event.currentTarget.getAttribute("data-sort");
+
+            let sortedRates = currency.sort(function(a, b){
+                if(isSorted){
+                    return a[key] > b[key] ? -1 : 1;
+                }
+                return a[key] > b[key] ? 1 : -1;
+            });
+
+            if(isSorted){
+                event.currentTarget.removeAttribute("data-sort");
+            }else{
+                event.currentTarget.setAttribute("data-sort", "+");
+            }
+            
+
+            currencyRender(sortedRates);
+        }
+    }
+}
+
+
 document.querySelector('.search').onkeyup = function(event){
     let value = event.currentTarget.value.toLowerCase();
     let currencySelect = currency.filter(function(el){
@@ -13,10 +39,9 @@ document.querySelector('.search').onkeyup = function(event){
 
 
 document.querySelector('.input-date').onchange = function(event){
-    let valueDate = event.currentTarget.value.replace(/-/g, '');
+    let valueDate = event.currentTarget.value.replaceAll('-', '');
+    getCurrency(valueDate);
 
-    getCurrency(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${valueDate}&json`);
-    
     document.querySelector('.search').value = '';
 }
 
@@ -31,12 +56,14 @@ function currencyRender(currency){
                     </tr>`
     }, '');
     document.querySelector('.table tbody').innerHTML = htmlStr || '<tr><th colspan = "5" class="text-center">Not found</th></tr>';
+    toSort();
 }
 
 currencyRender(currency);
 
+
 function getCurrency(date){
-    fetch(date).then(function (data){
+    fetch(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${date}&json`).then(function (data){
         return data.json();
     }).then(function(data) {
         currency = data.map(function(el) {
@@ -50,4 +77,6 @@ function getCurrency(date){
             currencyRender(currency);
     });
 }
-getCurrency('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=20220801&json');
+getCurrency(20220801);
+
+
